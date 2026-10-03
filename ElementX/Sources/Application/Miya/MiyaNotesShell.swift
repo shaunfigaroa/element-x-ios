@@ -18,7 +18,7 @@ struct MiyaNotesShell: View {
 
     var body: some View {
         ZStack {
-            if started {
+            if started && unlocked {
                 chat
                     .safeAreaInset(edge: .top) {
                         HStack {
@@ -33,15 +33,15 @@ struct MiyaNotesShell: View {
                         .padding(.vertical, 4)
                         .background(.regularMaterial)
                     }
-                    .opacity(unlocked ? 1 : 0)
-                    .allowsHitTesting(unlocked)
-                    .accessibilityHidden(!unlocked)
             }
             if !unlocked { notes }
         }
         .onChange(of: scenePhase) { _, phase in
             if phase != .active {
                 if !unlocked, let note = selected { store.update(note) }
+                selected = nil
+                settingsPresented = false
+                phrase = ""
                 unlocked = false
             }
         }

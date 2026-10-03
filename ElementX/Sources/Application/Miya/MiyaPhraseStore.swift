@@ -25,13 +25,14 @@ struct MiyaPhraseStore {
     var isConfigured: Bool { record != nil }
 
     func set(_ phrase: String) throws {
-        guard phrase.count >= 8, !phrase.contains("\n") else { throw Failure.invalidPhrase }
+        let normalized = phrase.trimmingCharacters(in: .whitespacesAndNewlines).precomposedStringWithCanonicalMapping
+        guard normalized.count >= 8, !phrase.contains("\n") else { throw Failure.invalidPhrase }
         var salt = Data(count: 16)
         let status = salt.withUnsafeMutableBytes { SecRandomCopyBytes(kSecRandomDefault, 16, $0.baseAddress!) }
         guard status == errSecSuccess else { throw Failure.storage }
-        let key = derive(phrase, salt: salt)
+        let key = derive(normalized, salt: salt)
         guard key.count == 32 else { throw Failure.storage }
-        let value = try JSONEncoder().encode(Record(salt: salt, key: key, length: phrase.count))
+        let value = try JSONEncoder().encode(Record(salt: salt, key: key, length: normalized.count))
         let update = SecItemUpdate(query as CFDictionary, [kSecValueData as String: value] as CFDictionary)
         if update == errSecItemNotFound {
             var item = query
@@ -72,7 +73,7 @@ struct MiyaPhraseStore {
     }
 
     private func derive(_ phrase: String, salt: Data) -> Data {
-        let password = Array(phrase.utf8)
+        let password = Array(phrase.precomposedStringWithCanonicalMapping.utf8)
         var key = Data(count: 32)
         let status = password.withUnsafeBytes { passwordBytes in
             salt.withUnsafeBytes { saltBytes in

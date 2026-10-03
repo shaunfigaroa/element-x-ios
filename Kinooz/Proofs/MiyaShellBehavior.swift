@@ -32,7 +32,8 @@ import SQLite3
         }
         let phrase = MiyaPhraseStore(service: service)
         precondition(!phrase.isConfigured)
-        try phrase.set("persoonlijke testzin")
+        do { try phrase.set("        "); preconditionFailure("whitespace-only phrase accepted") } catch {}
+        try phrase.set("  persoonlijke testzin  ")
         precondition(phrase.isConfigured)
         precondition(phrase.removingTrigger(from: "Vooraf\npersoonlijke testzin\nAchteraf") == "Vooraf\n\nAchteraf")
         precondition(phrase.removingTrigger(from: "persoonlijke testzin") == "")

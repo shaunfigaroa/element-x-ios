@@ -31,14 +31,22 @@ swiftc -parse-as-library -o /tmp/miya-proof Kinooz/Proofs/MiyaShellBehavior.swif
 
 ## Current build limitations
 
-- A full `xcodebuild` of the `ElementX` scheme has not been confirmed as part of this change. It needs the
-  Swift packages (including the Matrix Rust SDK binary) to resolve, which is slow, and only one
-  package resolution may run per cache path at a time. Use an isolated `-clonedSourcePackagesDirPath`
-  / package cache when another build is running, with `CODE_SIGNING_ALLOWED=NO`.
-- `DEVELOPMENT_TEAM` is empty in `app.yml`, so signed device builds, push, and keychain access groups
-  (`KEYCHAIN_ACCESS_GROUP_IDENTIFIER`) need a team set locally before use.
+- The full unsigned Debug device build passed on Xcode 26.2, including a second build after the free
+  OpenCode/Bunny review fixes. A physical-device runtime test and signed push delivery remain pending.
+  Use an isolated `-clonedSourcePackagesDirPath` and package cache for reproducibility.
+- `DEVELOPMENT_TEAM` is empty in `app.yml`. The main app falls back to its private Keychain when the
+  shared group has no team prefix. Signed push/extension sharing still needs the correct Apple team.
 - `project.yml`/`app.yml` changes (bundle id `nl.kinooz.miya`, name, version) were also applied to the
   checked-in `ElementX.xcodeproj`; regenerate with XcodeGen to confirm they stay in sync.
 - The SwiftUI shell views (`MiyaNotesShell`) are only covered by compilation, not by UI tests; the app
   skips the shell when running under the existing test processes.
 - Notes do not sync, and are included in device backups unless protected by the user's backup settings.
+
+Canonical GitLab source keeps full upstream Git history with LFS storage disabled. Original upstream
+LFS fixtures remain available from `upstream`: run `git lfs pull upstream --include="DevelopmentAssets/Media/**"`
+for the development build. Do not fetch all historical snapshots merely to build the app.
+
+Free review proof: DUSK Mini OpenCode 1.18.34, provider `opencode`, model `space-bunny-free`,
+all assistant messages reported cost 0. Whitespace-only codephrases are rejected, accepted phrases
+are normalized, and inactive/background transitions remove the chat view from the hierarchy.
+The old notes SQLite has no attachments table; chat media remains on the unchanged Matrix server.
