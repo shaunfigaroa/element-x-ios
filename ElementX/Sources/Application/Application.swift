@@ -31,7 +31,7 @@ struct Application: App {
 
     var body: some Scene {
         WindowGroup {
-            appCoordinator.toPresentable()
+            rootView
                 .statusBarHidden(shouldHideStatusBar)
                 .overlay(alignment: .top) {
                     if #available(iOS 26, *), ProcessInfo.processInfo.isiOSAppOnMac {
@@ -61,11 +61,23 @@ struct Application: App {
                     appCoordinator.handleUserActivity(userActivity)
                 }
                 .task {
-                    appCoordinator.start()
+                    if isTestProcess { appCoordinator.start() }
                 }
         }
     }
     
+    private var isTestProcess: Bool {
+        ProcessInfo.isRunningUITests || ProcessInfo.isRunningUnitTests || ProcessInfo.isRunningAccessibilityTests
+    }
+
+    @ViewBuilder private var rootView: some View {
+        if isTestProcess {
+            appCoordinator.toPresentable()
+        } else {
+            MiyaNotesShell(chat: appCoordinator.toPresentable(), startChat: { appCoordinator.start() })
+        }
+    }
+
     // MARK: - Private
     
     private func openURL(_ url: URL, isExternalURL: Bool) {
