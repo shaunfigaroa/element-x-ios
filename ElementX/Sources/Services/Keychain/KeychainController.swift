@@ -35,8 +35,15 @@ final class KeychainController: KeychainControllerProtocol {
     }
 
     init(service: KeychainControllerService, accessGroup: String) {
-        restorationTokenKeychain = Keychain(service: service.restorationTokenID, accessGroup: accessGroup)
-        mainKeychain = Keychain(service: service.mainID, accessGroup: accessGroup)
+        // Unsigned/sideload builds have no team prefix. Use the private app
+        // Keychain in that case instead of an invalid shared access group.
+        if accessGroup.isEmpty || accessGroup.hasPrefix(".") {
+            restorationTokenKeychain = Keychain(service: service.restorationTokenID)
+            mainKeychain = Keychain(service: service.mainID)
+        } else {
+            restorationTokenKeychain = Keychain(service: service.restorationTokenID, accessGroup: accessGroup)
+            mainKeychain = Keychain(service: service.mainID, accessGroup: accessGroup)
+        }
     }
     
     // MARK: - Restoration Tokens
