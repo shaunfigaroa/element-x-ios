@@ -50,3 +50,9 @@ Free review proof: DUSK Mini OpenCode 1.18.34, provider `opencode`, model `space
 all assistant messages reported cost 0. Whitespace-only codephrases are rejected, accepted phrases
 are normalized, and inactive/background transitions remove the chat view from the hierarchy.
 The old notes SQLite has no attachments table; chat media remains on the unchanged Matrix server.
+
+DUSK ran a second independent OpenCode/Bunny review at cost 0. The sideload private Keychain
+uses WhenUnlockedThisDeviceOnly. The unsigned IPA must be re-signed by Feather before installation;
+unsigned compilation is build evidence, not device runtime proof. The built Info.plist actually contains
+`.nl.kinooz.miya` when no team is set, which the fallback handles. Shared namespaces with valid team
+prefixes retain upstream behavior. Use a configured Matrix recovery backup to restore encrypted history.
