@@ -56,3 +56,16 @@ uses WhenUnlockedThisDeviceOnly. The unsigned IPA must be re-signed by Feather b
 unsigned compilation is build evidence, not device runtime proof. The built Info.plist actually contains
 `.nl.kinooz.miya` when no team is set, which the fallback handles. Shared namespaces with valid team
 prefixes retain upstream behavior. Use a configured Matrix recovery backup to restore encrypted history.
+
+## UX review — 2026-10-04
+
+Free OpenCode/Zen Bunny review and correction added labelled editor fields, keyboard dismissal,
+focus navigation, reduced-motion-aware unlock animation, and immediate nonanimated hiding.
+The settings draft is cleared on swipe dismissal. Changing an existing codephrase is authorized
+inside the save action as well as in the button state, including keyboard submission; errors
+remain visible. Transient note-write errors can recover, while unreadable source files still
+block replacement. Existing notes emptied by recognized phrase removal are persisted sanitized.
+
+The full unsigned generic iOS Debug build passed after these changes; existing standalone
+behavior/migration/phrase checks also passed. Real keyboard, VoiceOver, animations and physical
+phone runtime are still pending. The published Feather 0.4.0 artifact predates this UX revision.

@@ -11,6 +11,13 @@ struct MiyaPhraseStore {
         let key: Data
         let length: Int
     }
+    /// `record` is consulted for every keystroke in the notes editor, so the decoded Keychain item is
+    /// kept in a box. The box is a reference, so the copies SwiftUI makes per body pass share it.
+    private final class Cache {
+        var isLoaded = false
+        var record: Record?
+    }
+    private let cache = Cache()
     private let service: String
 
     init(service: String = "nl.kinooz.miya.native-unlock") {
@@ -40,6 +47,8 @@ struct MiyaPhraseStore {
             item[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
             guard SecItemAdd(item as CFDictionary, nil) == errSecSuccess else { throw Failure.storage }
         } else if update != errSecSuccess { throw Failure.storage }
+        cache.isLoaded = false
+        cache.record = nil
     }
 
     func removingTrigger(from draft: String) -> String? {
@@ -63,13 +72,19 @@ struct MiyaPhraseStore {
     }
 
     private var record: Record? {
+        if cache.isLoaded { return cache.record }
         var request = query
         request[kSecReturnData as String] = true
         request[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: CFTypeRef?
-        guard SecItemCopyMatching(request as CFDictionary, &result) == errSecSuccess,
-              let data = result as? Data else { return nil }
-        return try? JSONDecoder().decode(Record.self, from: data)
+        var value: Record?
+        if SecItemCopyMatching(request as CFDictionary, &result) == errSecSuccess,
+           let data = result as? Data {
+            value = try? JSONDecoder().decode(Record.self, from: data)
+        }
+        cache.isLoaded = true
+        cache.record = value
+        return value
     }
 
     private func derive(_ phrase: String, salt: Data) -> Data {

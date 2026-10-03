@@ -20,6 +20,9 @@ struct MiyaNote: Codable, Identifiable, Equatable, Hashable {
     private(set) var folders: [String] = []
     private struct Document: Codable { let notes: [MiyaNote]; let folders: [String] }
     private let fileURL: URL
+    /// Set only when an existing file must never be replaced: an unreadable notes.json or a failed
+    /// migration. A failed *write* is not one of those, so it must not disable editing for good.
+    private var blocksSaving = false
 
     init(fileURL: URL? = nil, legacyURL: URL = MiyaLegacyNotes.databaseURL) {
         self.fileURL = fileURL ?? URL.applicationSupportDirectory.appending(path: "MiyaNative/notes.json")
@@ -29,6 +32,7 @@ struct MiyaNote: Codable, Identifiable, Equatable, Hashable {
                 notes = document.notes
                 folders = document.folders
             } catch {
+                blocksSaving = true
                 storageError = "De notities konden niet worden geopend. Het bestaande bestand blijft bewaard."
             }
         } else if FileManager.default.fileExists(atPath: legacyURL.path) {
@@ -38,6 +42,7 @@ struct MiyaNote: Codable, Identifiable, Equatable, Hashable {
                 folders = imported.folders
                 save()
             } catch {
+                blocksSaving = true
                 storageError = "De bestaande notities konden niet worden overgenomen. Het oorspronkelijke bestand blijft bewaard."
             }
         } else {
@@ -46,8 +51,16 @@ struct MiyaNote: Codable, Identifiable, Equatable, Hashable {
         }
     }
 
+    /// Saves a note from which a codephrase was just removed. An emptied note that is already stored is
+    /// written on purpose: skipping it would leave the recognised phrase in notes.json.
+    func updateAfterPhraseRemoval(_ note: MiyaNote) {
+        let isEmpty = note.title.isEmpty && note.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        if isEmpty, !notes.contains(where: { $0.id == note.id }) { return }
+        update(note)
+    }
+
     func update(_ note: MiyaNote) {
-        guard storageError == nil else { return }
+        guard !blocksSaving else { return }
         if let index = notes.firstIndex(where: { $0.id == note.id }) {
             notes[index] = note
         } else if !note.title.isEmpty || !note.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -60,6 +73,7 @@ struct MiyaNote: Codable, Identifiable, Equatable, Hashable {
         do {
             try FileManager.default.createDirectory(at: fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
             try JSONEncoder().encode(Document(notes: notes, folders: folders)).write(to: fileURL, options: [.atomic, .completeFileProtection])
+            storageError = nil
         } catch {
             storageError = "De notities konden niet worden opgeslagen."
         }
