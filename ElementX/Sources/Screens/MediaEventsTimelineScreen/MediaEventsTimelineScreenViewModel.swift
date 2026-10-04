@@ -12,6 +12,12 @@ import SwiftUI
 typealias MediaEventsTimelineScreenViewModelType = StateStoreViewModelV2<MediaEventsTimelineScreenViewState, MediaEventsTimelineScreenViewAction>
 
 class MediaEventsTimelineScreenViewModel: MediaEventsTimelineScreenViewModelType, MediaEventsTimelineScreenViewModelProtocol {
+    /// Stable, namespaced identifier for the fallback group holding timeline items that
+    /// arrive without a preceding date separator. There can only ever be one such group,
+    /// and the id must not change between updates: deriving it from the group's items would
+    /// change identity as back pagination loads older items into the group.
+    private static let ungroupedItemsGroupID = "io.element.call.mediaEventsTimeline.ungroupedItems"
+    
     private let mediaTimelineViewModel: TimelineViewModelProtocol
     private let filesTimelineViewModel: TimelineViewModelProtocol
     private let mediaProvider: MediaProviderProtocol
@@ -196,7 +202,7 @@ class MediaEventsTimelineScreenViewModel: MediaEventsTimelineScreenViewModelType
         
         if !currentItems.isEmpty {
             MXLog.warning("Found ungrouped timeline items, appending them at end.")
-            let group = MediaEventsTimelineGroup(id: UUID().uuidString,
+            let group = MediaEventsTimelineGroup(id: Self.ungroupedItemsGroupID,
                                                  title: titleForDate(.now),
                                                  items: currentItems)
             newGroups.append(group)

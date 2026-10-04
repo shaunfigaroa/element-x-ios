@@ -21,7 +21,17 @@ struct ImageMediaEventsTimelineView: View {
             }
             .clipped()
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(L10n.commonImage)
+            .accessibilityLabel(accessibilityLabel)
+    }
+    
+    private var accessibilityLabel: String {
+        let filename = timelineItem.content.filename
+        
+        if filename.isEmpty {
+            return L10n.commonImage
+        } else {
+            return "\(L10n.commonImage), \(filename)"
+        }
     }
     
     @ViewBuilder

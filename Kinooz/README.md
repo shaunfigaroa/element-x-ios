@@ -69,3 +69,13 @@ block replacement. Existing notes emptied by recognized phrase removal are persi
 The full unsigned generic iOS Debug build passed after these changes; existing standalone
 behavior/migration/phrase checks also passed. Real keyboard, VoiceOver, animations and physical
 phone runtime are still pending. The published Feather 0.4.0 artifact predates this UX revision.
+
+## Media gallery review — 2026-10-04
+
+The gallery now shows an error and exits its flow if either filtered timeline cannot be
+created. Ungrouped media retains a stable group identity between updates. Photo labels include
+filenames, videos announce their duration and date separators carry the accessibility header trait.
+The full unsigned generic iOS Debug build passed after correcting explicit string-getter returns.
+Physical gallery navigation, VoiceOver and failure-path runtime checks remain pending.
+The shared long-press modifier already supports both touch and VoiceOver; no duplicate context
+menu or speculative voice-filter change was introduced.

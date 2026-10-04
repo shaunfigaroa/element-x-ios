@@ -23,6 +23,11 @@ struct VideoMediaEventsTimelineView: View {
             .overlay(alignment: .bottom) { overlay }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel(L10n.commonVideo)
+            .accessibilityValue(formattedDuration)
+    }
+    
+    private var formattedDuration: String {
+        Duration.seconds(timelineItem.content.videoInfo.duration).formatted(.time(pattern: .minuteSecond))
     }
     
     @ViewBuilder
@@ -45,7 +50,7 @@ struct VideoMediaEventsTimelineView: View {
         HStack(spacing: 0) {
             CompoundIcon(\.videoCallSolid)
             Spacer()
-            Text(Duration.seconds(timelineItem.content.videoInfo.duration).formatted(.time(pattern: .minuteSecond)))
+            Text(formattedDuration)
         }
         .padding(8)
         .background {

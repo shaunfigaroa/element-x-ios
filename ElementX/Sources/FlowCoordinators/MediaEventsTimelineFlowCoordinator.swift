@@ -59,22 +59,28 @@ class MediaEventsTimelineFlowCoordinator: FlowCoordinatorProtocol {
                                                           stateEventStringBuilder: RoomStateEventStringBuilder(userID: userSession.clientProxy.userID))
         
         guard case let .success(mediaTimelineController) = await flowParameters.timelineControllerFactory.buildMessageFilteredTimelineController(focus: .live,
-                                                                                                                                                 allowedMessageTypes: [.image, .video],
-                                                                                                                                                 presentation: .mediaFilesScreen,
-                                                                                                                                                 roomProxy: roomProxy,
-                                                                                                                                                 timelineItemFactory: timelineItemFactory,
-                                                                                                                                                 mediaProvider: userSession.mediaProvider) else {
+                                                                                 allowedMessageTypes: [.image, .video],
+                                                                                 presentation: .mediaFilesScreen,
+                                                                                 roomProxy: roomProxy,
+                                                                                 timelineItemFactory: timelineItemFactory,
+                                                                                 mediaProvider: userSession.mediaProvider) else {
             MXLog.error("Failed presenting media timeline")
+            flowParameters.userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
+            // Nothing has been pushed yet, so the parent flow needs to be told that this flow is over.
+            actionsSubject.send(.finished)
             return
         }
         
         guard case let .success(filesTimelineController) = await flowParameters.timelineControllerFactory.buildMessageFilteredTimelineController(focus: .live,
-                                                                                                                                                 allowedMessageTypes: [.file, .audio],
-                                                                                                                                                 presentation: .mediaFilesScreen,
-                                                                                                                                                 roomProxy: roomProxy,
-                                                                                                                                                 timelineItemFactory: timelineItemFactory,
-                                                                                                                                                 mediaProvider: userSession.mediaProvider) else {
-            MXLog.error("Failed presenting media timeline")
+                                                                                 allowedMessageTypes: [.file, .audio],
+                                                                                 presentation: .mediaFilesScreen,
+                                                                                 roomProxy: roomProxy,
+                                                                                 timelineItemFactory: timelineItemFactory,
+                                                                                 mediaProvider: userSession.mediaProvider) else {
+            MXLog.error("Failed presenting files timeline")
+            flowParameters.userIndicatorController.submitIndicator(.init(title: L10n.errorUnknown))
+            // Nothing has been pushed yet, so the parent flow needs to be told that this flow is over.
+            actionsSubject.send(.finished)
             return
         }
         
