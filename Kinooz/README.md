@@ -79,3 +79,11 @@ The full unsigned generic iOS Debug build passed after correcting explicit strin
 Physical gallery navigation, VoiceOver and failure-path runtime checks remain pending.
 The shared long-press modifier already supports both touch and VoiceOver; no duplicate context
 menu or speculative voice-filter change was introduced.
+
+## Beta 0.4.1 build 6
+
+Unsigned Debug device build passed; published through both existing Feather sources with
+Alma and Maginary entries unchanged. IPA: 140237035 bytes, SHA256
+`e353eb84abd9ab07fb5e7605c56f095e42334004b16c60cfc7f580a7d78a2892`.
+Includes the reviewed shell and gallery changes above. Installation is re-signed by Feather;
+physical iPhone runtime, APNs delivery and calls remain pending.
